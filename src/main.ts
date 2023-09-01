@@ -71,7 +71,7 @@ function drawGrid(sudoku: number[]) {
       const square = document.createElement('div');
       checkBorder(square, j, i)
       square.className = 'square';
-      square.onclick = (e) => onSquareClick(j, i);
+      square.onclick = () => onSquareClick(j, i);
       square.id = `${j} ${i}`
 
       const number = document.createElement("p");

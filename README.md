@@ -1,6 +1,9 @@
 # Sudoku
 Here is a little sudoku application. This is not a tool or a solution to a problematic, just a small project to familiarize with Tauri.
 
+## Installation
+Go to the [resleases](github.com/0ri0nexe/sudoku/releases/latest) and install with the way which makes you happy. Then run the executable and have fun ^^.
+
 ## features
 Yet the application is not finished, I still working on it for now, but when I'll considere that there is nothing left to learn from it, I'm gonna move on another bigger project.
 
