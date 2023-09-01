@@ -1,0 +1,26 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.ligne {
+  width: 100%;
+  height: 11.11%;
+  display: flex;
+}
+
+.square {
+  flex: 1;
+  background-color: #404F69;
+  border: 1px solid #37568D;
+  box-sizing: border-box;
+  display: flex;
+  align-items: unsafe center;
+  justify-content: center;
+  font-size: 3em;
+}
+
+p {
+  color: #E0E0E0;
+}
