@@ -18,15 +18,24 @@ function getSelectedSquare() {
   return document.getElementById(`${selectedSquareCoords[0]} ${selectedSquareCoords[1]}`) as HTMLElement
 }
 
+function erase() {
+  while (document.body.firstChild) {
+    document.body.removeChild(document.body.firstChild);
+  }
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   window.onkeydown = (e) => onKeyPressed(e.key);
   drawGrid(sudoku);
 });
-
 function onKeyPressed(key: String) {
   switch (key) {
     case "d":
       solveSudoku();
+      break;
+
+    case "n":
+      newSudoku();
       break;
 
     case "1":
@@ -131,8 +140,13 @@ async function solveSudoku() {
     },
   );
   solvedSudoku = (await response).sudoku;
-  while (document.body.firstChild) {
-    document.body.removeChild(document.body.firstChild);
-  }
+  erase();
   drawGrid(solvedSudoku);
+}
+
+async function newSudoku() {
+  let response: Promise<Payload> = invoke("get_new_sudoku");
+  sudoku = (await response).sudoku;
+  erase();
+  drawGrid(sudoku);
 }

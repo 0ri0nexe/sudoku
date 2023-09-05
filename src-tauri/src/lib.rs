@@ -1,12 +1,72 @@
-use std::fmt::Display;
+use rand::{self, Rng};
+use std::{fmt::Display, vec};
 #[derive(Debug)]
 pub struct Sudoku {
     board: [u8; 81],
 }
 
 impl Sudoku {
-    pub fn new() -> Sudoku {
-        Sudoku { board: [0u8; 81] }
+    pub fn new(random: bool) -> Sudoku {
+        let mut sudoku = Sudoku { board: [0u8; 81] };
+        if !random {
+            return sudoku;
+        }
+        let mut rng = rand::thread_rng();
+
+        //setup the first block
+        for x in 0..9 {
+            let y = 1u8;
+            sudoku.set_random_number(x, y, &mut rng);
+        }
+        for y in 0..9 {
+            let x = 1u8;
+            sudoku.set_random_number(x, y, &mut rng);
+        }
+        let solved_sudoku = solve(&sudoku);
+        match solved_sudoku {
+            None => panic!("problem during creation of the sudoku"),
+            Some(sudoku) => return sudoku,
+        }
+    }
+
+    pub fn set_random_number(&mut self, x: u8, y: u8, rng: &mut rand::rngs::ThreadRng) {
+        loop {
+            let mut possibilities: Vec<u8> = (1..=9).collect();
+            let chosen_possibility: usize = rng.gen_range(0..possibilities.len());
+            self.set(
+                &Coords { x, y },
+                *possibilities.get(chosen_possibility).unwrap(),
+            );
+            if self.is_in_rule(&Coords { x, y }) {
+                break;
+            }
+            possibilities.remove(chosen_possibility);
+
+            // SHOULD NEVER BE REACHED
+            if possibilities.len() == 0 {
+                panic!("problem during the creation of the new sudoku");
+            }
+        }
+    }
+
+    pub fn get_playable_sudoku(self, difficulty: f64) -> Sudoku {
+        let solved_sudoku = solve(&self);
+        if let None = solved_sudoku {
+            return self;
+        }
+
+        let mut solved_sudoku = solved_sudoku.unwrap();
+        let numbers_to_remove = (81 - 7) as f64 * (1 as f64 - difficulty);
+        let mut numbers: Vec<i32> = (0..81).collect();
+        let mut rng = rand::thread_rng();
+        for _ in 0..(numbers_to_remove as i32) {
+            let num_choice = rng.gen_range(0..numbers.len());
+            let coords_1d = *numbers.get(num_choice).unwrap();
+            let coords = Coords::from(coords_1d);
+            numbers.remove(num_choice);
+            solved_sudoku.set(&coords, 0);
+        }
+        return solved_sudoku;
     }
 
     pub fn from(board: [u8; 81]) -> Sudoku {
@@ -129,6 +189,13 @@ pub struct Coords {
 }
 
 impl Coords {
+    fn from(coord_1d: i32) -> Coords {
+        return Coords {
+            x: (coord_1d % 9) as u8,
+            y: (coord_1d / 9) as u8,
+        };
+    }
+
     fn to_int(&self) -> usize {
         (self.x + self.y * 9) as usize
     }
@@ -158,9 +225,19 @@ impl Coords {
 }
 
 pub fn solve(sudoku: &Sudoku) -> Option<Sudoku> {
+    for x in 0..9 {
+        for y in 0..9 {
+            if !sudoku.is_in_rule(&Coords {
+                x: x as u8,
+                y: y as u8,
+            }) {
+                return None;
+            }
+        }
+    }
+
     let mut current_search = Coords { x: 0, y: 0 };
     let mut solver_sudoku = sudoku.clone();
-
     let mut go_back = false;
 
     loop {
@@ -228,7 +305,7 @@ mod tests {
 
     #[test]
     fn board_creation() {
-        let sudoku = Sudoku::new();
+        let sudoku = Sudoku::new(false);
         let board = sudoku.board();
 
         assert_eq!(board, &[0u8; 81]);

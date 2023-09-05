@@ -12,7 +12,15 @@ struct Payload {
 }
 
 #[tauri::command]
-async fn solve_sudoku<'a>(received_sudoku: Payload) -> Payload {
+async fn get_new_sudoku() -> Payload {
+    let sudoku = Sudoku::new(true).get_playable_sudoku(0.2);
+    Payload {
+        sudoku: sudoku.to_vector(),
+    }
+}
+
+#[tauri::command]
+async fn solve_sudoku(received_sudoku: Payload) -> Payload {
     // for now the payload wrapper is useless
     let received_sudoku = received_sudoku.sudoku;
     // putting sudoku in the right format
@@ -37,7 +45,6 @@ async fn solve_sudoku<'a>(received_sudoku: Payload) -> Payload {
             for i in solved_sudoku.to_array() {
                 result.push(i as i32);
             }
-
             return Payload { sudoku: result };
         }
     }
@@ -45,7 +52,7 @@ async fn solve_sudoku<'a>(received_sudoku: Payload) -> Payload {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![solve_sudoku])
+        .invoke_handler(tauri::generate_handler![solve_sudoku, get_new_sudoku])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
